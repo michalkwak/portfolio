@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Michał Kwak</title>
+  <meta name="description" content="Michał Kwak is a Computer & Data Science student at the University of Helsinki, working on software, data and machine learning.">
+  <meta name="theme-color" content="#060509">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Michał Kwak">
+  <meta property="og:description" content="Computer & Data Science, University of Helsinki. Software, data and machine learning.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="vision" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+
+  <div class="stage" id="stage">
+    <header class="corner corner--tl" style="--i: 0">
+      <h1 class="name"><a href="./">Michał Kwak</a></h1>
+      <p class="label">Computer &amp; Data Science<br>University of Helsinki</p>
+    </header>
+
+    <nav class="corner corner--tr" style="--i: 1" aria-label="Sections">
+      <ul class="tabs" id="tabs"></ul>
+    </nav>
+
+    <footer class="corner corner--bl" style="--i: 2">
+      <div id="now"></div>
+      <p class="label">
+        <span id="city">Helsinki</span>
+        <time class="clock" id="clock">--:--:--</time>
+        <span id="tz"></span>
+      </p>
+      <p class="label" id="coords">60.17° N · 24.94° E</p>
+    </footer>
+
+    <ul class="corner corner--br links" id="links" style="--i: 3" aria-label="Elsewhere"></ul>
+
+    <noscript>
+      <p class="noscript">
+        This page draws itself with JavaScript. Meanwhile:
+        <a href="https://github.com/michalkwak">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/michalkwak">LinkedIn</a> ·
+        <a href="mailto:michal.kwak2806@gmail.com">Email</a>
+      </p>
+    </noscript>
+  </div>
+
+  <div class="scrim" id="scrim" data-close aria-hidden="true"></div>
+
+  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true" inert>
+    <header class="panel__head">
+      <ul class="panel__tabs" id="panel-tabs"></ul>
+      <button class="panel__close" type="button" data-close>
+        Close <kbd>esc</kbd>
+      </button>
+    </header>
+    <div class="panel__scroll" id="panel-scroll">
+      <div class="panel__inner">
+        <p class="label panel__index" id="panel-index"></p>
+        <h2 class="panel__title" id="panel-title" tabindex="-1"></h2>
+        <div class="panel__body" id="panel-body"></div>
+        <p class="label panel__foot">Michał Kwak · Helsinki · Spiral out</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/vision.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
