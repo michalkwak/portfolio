@@ -177,19 +177,6 @@ window.PORTFOLIO = {
       ],
     },
     {
-      id: "full-stack-open",
-      period: "05/2026 – 07/2026",
-      title: "Full Stack Open",
-      role: "University of Helsinki MOOC",
-      summary: "Modern web development, from React frontends to Node.js REST backends.",
-      bullets: [
-        "React apps: Unicafe feedback, anecdotes, a country data browser and a phonebook.",
-        "Phonebook backend and a blog list app with Node.js and Express REST APIs.",
-      ],
-      tags: ["JavaScript", "React", "Node.js", "Express", "REST"],
-      links: [{ label: "Repository", url: "https://github.com/michalkwak/Full-Stack-Open" }],
-    },
-    {
       id: "resilience-index",
       period: "02/2026",
       title: "Municipal Economic Resilience Index",
@@ -217,19 +204,6 @@ window.PORTFOLIO = {
       ],
       tags: ["Python", "Similarity search"],
       links: [{ label: "Repository", url: "https://github.com/michalkwak/gym-exercise-similarity-finder" }],
-    },
-    {
-      id: "dna",
-      period: "06/2025",
-      title: "DNA Sequence Analysis",
-      role: "Course project · Data Analysis in Python",
-      summary: "Python tools for DNA and RNA sequence analysis with algorithmic and statistical methods.",
-      bullets: [
-        "Implemented k-mer indexing, codon translation and frequency analysis.",
-        "Applied probabilistic models (Markov chains, probability distributions) to biological sequences.",
-      ],
-      tags: ["Python", "NumPy", "pandas", "Jupyter"],
-      links: [{ label: "Repository", url: "https://github.com/michalkwak/DNA-Sequence-Analysis" }],
     },
     {
       id: "kana-quest",

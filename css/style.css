@@ -66,6 +66,104 @@ button {
   border-radius: 2px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- cursor (mouse and trackpad only, see js/cursor.js) ---------- */
+
+.has-cursor,
+.has-cursor * {
+  cursor: none !important;
+}
+
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.cursor.is-hidden {
+  opacity: 0;
+}
+
+.cursor__ring {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 46px;
+  height: 46px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--gold);
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(227, 191, 122, 0.45));
+  will-change: transform;
+}
+
+.cursor__ring path,
+.cursor__ring circle {
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition: opacity 0.35s ease;
+}
+
+.cursor__circle {
+  opacity: 0.22;
+}
+
+.cursor__eye {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.cursor__pupil {
+  fill: var(--gold);
+  stroke: none;
+}
+
+.cursor__dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 8px rgba(227, 191, 122, 0.8);
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+
+.cursor.is-link .cursor__circle {
+  opacity: 0.5;
+}
+
+.cursor.is-link .cursor__dot,
+.cursor.is-eye .cursor__dot {
+  opacity: 0;
+}
+
+.cursor.is-eye .cursor__star,
+.cursor.is-eye .cursor__circle {
+  opacity: 0;
+}
+
+.cursor.is-eye .cursor__eye {
+  opacity: 1;
+}
+
 .label {
   margin: 0;
   font: 500 10.5px/1.7 var(--mono);
@@ -459,6 +557,56 @@ kbd {
   outline: none;
 }
 
+/* Letters rise out of a blur, lit gold, then settle to ivory. */
+.panel__title .char {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  transform-origin: 0 100%;
+  animation: char-in 1.1s var(--ease) forwards;
+  animation-delay: calc(var(--title-delay, 0s) + var(--c, 0) * 0.045s);
+}
+
+@keyframes char-in {
+  0% {
+    opacity: 0;
+    transform: translateY(0.45em) rotate(6deg);
+    filter: blur(10px);
+    color: var(--gold);
+  }
+  55% {
+    color: var(--gold);
+    text-shadow: 0 0 24px rgba(227, 191, 122, 0.55);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+    color: var(--ink);
+    text-shadow: none;
+  }
+}
+
+.panel__grab {
+  display: none;
+  flex: none;
+  height: 22px;
+  position: relative;
+  cursor: grab;
+}
+
+.panel__grab::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: 2px;
+  background: rgba(236, 230, 218, 0.22);
+}
+
 .panel__foot {
   margin-top: 64px;
   padding-top: 20px;
@@ -574,6 +722,106 @@ kbd {
 .big-link:hover {
   color: var(--gold);
   border-color: var(--gold);
+}
+
+.reach {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+}
+
+/* ---------- copy email ---------- */
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 11px/1.9 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.copy:hover {
+  color: var(--ink);
+}
+
+/* "Email" rolls up and "Copied" rolls in. */
+.copy__roll {
+  display: inline-grid;
+  overflow: hidden;
+  text-align: right;
+}
+
+.copy__roll > span {
+  grid-area: 1 / 1;
+  transition: transform 0.55s var(--ease), opacity 0.55s var(--ease);
+}
+
+.copy__roll > span:last-child {
+  color: var(--gold);
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.copy.is-copied .copy__roll > span:first-child {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.copy.is-copied .copy__roll > span:last-child {
+  opacity: 1;
+  transform: none;
+}
+
+.copy__icon {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--ink-3);
+  transition: color 0.4s var(--ease);
+}
+
+.copy:hover .copy__icon,
+.copy.is-copied .copy__icon {
+  color: var(--gold);
+}
+
+.copy__copy,
+.copy__check {
+  transition: opacity 0.3s var(--ease), stroke-dashoffset 0.5s var(--ease) 0.1s;
+}
+
+.copy__check {
+  opacity: 0;
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+}
+
+.copy.is-copied .copy__copy {
+  opacity: 0;
+}
+
+.copy.is-copied .copy__check {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+.copy--inline {
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.copy--inline:hover,
+.copy--inline.is-copied {
+  border-color: var(--gold-soft);
 }
 
 /* ---------- entries (experience and projects) ---------- */
@@ -752,17 +1000,50 @@ kbd {
 
 /* ---------- small screens ---------- */
 
+/* Below 900px the panel is a bottom sheet that slides up and can be dragged
+   down to close. */
 @media (max-width: 899px) {
   :root {
     --panel-w: 100vw;
   }
 
   .panel {
+    top: calc(28px + env(safe-area-inset-top));
     border-left: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.5);
+    transform: translateY(104%);
   }
 
   .panel::before {
-    display: none;
+    left: 15%;
+    right: 15%;
+    top: -1px;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-soft) 30%, var(--gold-soft) 70%, transparent);
+  }
+
+  .panel.is-dragging {
+    transition: none;
+  }
+
+  .panel__grab {
+    display: block;
+  }
+
+  .panel__head {
+    padding-top: 4px;
+  }
+
+  .scrim {
+    background: rgba(6, 5, 9, 0.5);
+  }
+
+  .panel-open .scrim {
+    opacity: calc(1 - var(--sheet-drag, 0));
   }
 }
 

@@ -42,7 +42,22 @@
     const external = /^https?:/.test(l.url);
     return `<a href="${esc(l.url)}"${external ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)} <span class="arrow" aria-hidden="true">↗</span></a>`;
   };
-  $("#links").innerHTML = D.links.map((l) => `<li>${link(l)}</li>`).join("");
+
+  // Email links copy the address instead of opening a mail app.
+  const copyButton = (address, label, extra = "") => `
+    <button class="copy ${extra}" type="button" data-copy="${esc(address)}" title="Copy ${esc(address)}">
+      <span class="copy__roll" aria-hidden="true"><span>${esc(label)}</span><span>Copied</span></span>
+      <span class="sr-only">Copy email address</span>
+      <svg class="copy__icon" viewBox="0 0 12 12" aria-hidden="true">
+        <g class="copy__copy"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2"></rect><path d="M1.5 8V2.5a1 1 0 0 1 1-1H8"></path></g>
+        <path class="copy__check" d="M2 6.5l2.5 2.5L10 3.5"></path>
+      </svg>
+    </button>`;
+  const emailOf = (l) => l.url.replace(/^mailto:/, "");
+
+  $("#links").innerHTML = D.links
+    .map((l) => `<li>${l.url.startsWith("mailto:") ? copyButton(emailOf(l), l.label) : link(l)}</li>`)
+    .join("");
 
   if (D.now) {
     $("#now").innerHTML = `
@@ -120,7 +135,10 @@
         email
           ? `<section class="block reveal" style="--d:${d++}">
               <h3 class="label">Reach out</h3>
-              <a class="big-link" href="${esc(email.url)}">${esc(email.url.replace("mailto:", ""))} <span class="arrow" aria-hidden="true">↗</span></a>
+              <div class="reach">
+                <a class="big-link" href="${esc(email.url)}">${esc(emailOf(email))} <span class="arrow" aria-hidden="true">↗</span></a>
+                ${copyButton(emailOf(email), "Copy", "copy--inline")}
+              </div>
             </section>`
           : ""
       }`;
@@ -159,10 +177,18 @@
   let opener = null;
   let swapTimer = 0;
 
-  function fill(section, expand) {
+  // The title rises in letter by letter, lit gold before it settles.
+  function setTitle(text, delay) {
+    panelTitle.style.setProperty("--title-delay", `${delay}s`);
+    panelTitle.innerHTML =
+      `<span class="sr-only">${esc(text)}</span>` +
+      [...text].map((ch, i) => `<span class="char" style="--c:${i}" aria-hidden="true">${esc(ch)}</span>`).join("");
+  }
+
+  function fill(section, expand, delay = 0) {
     const i = SECTIONS.indexOf(section);
     panelIndex.textContent = `${pad(i + 1)} / ${pad(SECTIONS.length)}`;
-    panelTitle.textContent = section.title;
+    setTitle(section.title, delay);
     panelBody.innerHTML = section.render();
     scroller.scrollTop = 0;
     if (expand) {
@@ -199,7 +225,7 @@
         panel.classList.remove("is-swapping");
       }, 220);
     } else if (!wasOpen || expand) {
-      fill(section, expand);
+      fill(section, expand, wasOpen ? 0 : 0.3);
     }
 
     if (!wasOpen) {
@@ -245,7 +271,99 @@
     else hide();
   }
 
+  /* ---------- copy email ---------- */
+
+  const announcer = $("#announce");
+  const copyTimers = new WeakMap();
+
+  function announce(text) {
+    announcer.textContent = "";
+    requestAnimationFrame(() => (announcer.textContent = text));
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Older browsers or no permission: copy through a hidden textarea.
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.append(ta);
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch {}
+      ta.remove();
+      return ok;
+    }
+  }
+
+  async function copyEmail(button) {
+    const address = button.dataset.copy;
+    if (!(await copyText(address))) {
+      location.href = `mailto:${address}`;
+      return;
+    }
+    button.classList.add("is-copied");
+    announce(`Copied ${address}`);
+    clearTimeout(copyTimers.get(button));
+    copyTimers.set(button, setTimeout(() => button.classList.remove("is-copied"), 1800));
+  }
+
+  /* ---------- bottom sheet drag (narrow screens) ---------- */
+
+  // Drag down from the header, or from the content while it is scrolled to
+  // the top, to dismiss the sheet.
+  let drag = null;
+
+  panel.addEventListener("touchstart", (e) => {
+    if (wide.matches || !current || e.touches.length !== 1) return;
+    const fromHead = !!e.target.closest(".panel__grab, .panel__head");
+    if (!fromHead && scroller.scrollTop > 0) return;
+    drag = { y0: e.touches[0].clientY, t0: performance.now(), dy: 0, active: false };
+  }, { passive: true });
+
+  panel.addEventListener("touchmove", (e) => {
+    if (!drag) return;
+    const dy = e.touches[0].clientY - drag.y0;
+    if (!drag.active) {
+      if (dy < -6) drag = null; // scrolling up: let the content scroll
+      if (!drag || dy < 6) return;
+      drag.active = true;
+      panel.classList.add("is-dragging");
+    }
+    e.preventDefault();
+    drag.dy = Math.max(0, dy);
+    panel.style.transform = `translateY(${drag.dy}px)`;
+    body.style.setProperty("--sheet-drag", String(Math.min(1, drag.dy / panel.offsetHeight)));
+  }, { passive: false });
+
+  function endDrag() {
+    if (!drag) return;
+    const { active, dy, t0 } = drag;
+    drag = null;
+    if (!active) return;
+    panel.classList.remove("is-dragging");
+    panel.style.transform = "";
+    body.style.removeProperty("--sheet-drag");
+    const velocity = dy / Math.max(1, performance.now() - t0); // px per ms
+    if (dy > panel.offsetHeight * 0.25 || velocity > 0.6) close();
+  }
+  panel.addEventListener("touchend", endDrag);
+  panel.addEventListener("touchcancel", endDrag);
+
+  /* ---------- events ---------- */
+
   document.addEventListener("click", (e) => {
+    const copy = e.target.closest("[data-copy]");
+    if (copy) {
+      copyEmail(copy);
+      return;
+    }
     const trigger = e.target.closest("[data-section]");
     if (trigger) {
       go(trigger.dataset.section, trigger.dataset.expand);

@@ -352,6 +352,7 @@
     S.par.y = lerp(S.par.y, py, damp(2.5, dt));
 
     // Hover over the eye.
+    //const hover = pointer.seen && S.inset === 0 && onEye(pointer.x, pointer.y);
     const hover = pointer.seen && S.inset === 0 && onEye(pointer.x, pointer.y);
     if (hover !== S.hover) {
       S.hover = hover;
@@ -824,6 +825,7 @@
       S.dirty = true;
     },
     pulse,
+    isOverEye: () => S.hover,
   };
 
   layout();
