@@ -119,7 +119,7 @@
       ${
         email
           ? `<section class="block reveal" style="--d:${d++}">
-              <h3 class="label">Say hello</h3>
+              <h3 class="label">Reach out</h3>
               <a class="big-link" href="${esc(email.url)}">${esc(email.url.replace("mailto:", ""))} <span class="arrow" aria-hidden="true">↗</span></a>
             </section>`
           : ""

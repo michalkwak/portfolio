@@ -18,7 +18,7 @@ window.PORTFOLIO = {
   },
 
   // Text that circles the centrepiece. It repeats to fill the ring.
-  ringText: "Spiral out · Keep going · Computer & Data Science · Machine learning · Software · ",
+  ringText: "Computer & Data Science · Machine learning · Software · ",
 
   // Bottom-right corner. Put the PDF in /cv and uncomment the CV line to show it.
   links: [
