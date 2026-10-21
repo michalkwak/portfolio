@@ -1,7 +1,3 @@
-import { drawHalftone, paintHalftone } from './halftone';
-import { loadPatternImages, patterns } from './patterns';
-import type { Pattern } from '../data/projects';
-
 /** Sizes the vertical word to run from below the header to the caption band. */
 function fitWord(poster: HTMLElement) {
   const word = poster.querySelector<HTMLElement>('.poster-word');
@@ -14,48 +10,13 @@ function fitWord(poster: HTMLElement) {
   word.style.fontSize = `${Math.min(maxSize, (maxSize * room) / word.offsetHeight)}px`;
 }
 
-/** Draws every static poster cover and redraws it when its size changes. Live
- * posters draw themselves (src/scripts/figures/); only their word is fitted here. */
+/** Keeps the featured poster's vertical word fitted as the poster resizes. */
 export function initPosters() {
-  const posters = document.querySelectorAll<HTMLElement>('.poster');
-  const lastWidth = new WeakMap<HTMLElement, number>();
-
-  const render = (poster: HTMLElement) => {
-    const width = poster.clientWidth;
-    if (lastWidth.get(poster) === width) return;
-    lastWidth.set(poster, width);
-    fitWord(poster);
-    const canvas = poster.querySelector<HTMLCanvasElement>('canvas[data-pattern]');
-    if (!canvas) return;
-    const layer = canvas.dataset.layer as Pattern | undefined;
-    const cell = Math.min(10, Math.max(5, width / 64));
-    const fitted = drawHalftone(canvas, patterns[canvas.dataset.pattern as Pattern], {
-      ink: canvas.dataset.ink ?? '#000',
-      cell,
-      seed: canvas.dataset.pattern!.length,
-    });
-    if (layer && fitted) {
-      paintHalftone(fitted.ctx, fitted.w, fitted.h, patterns[layer], {
-        ink: canvas.dataset.layerInk ?? '#000',
-        cell,
-        seed: 7,
-        grit: 0.04,
-      });
-    }
-  };
-
+  const posters = [...document.querySelectorAll<HTMLElement>('.poster')].filter((p) => p.querySelector('.poster-word'));
   const observer = new ResizeObserver((entries) => {
-    for (const entry of entries) render(entry.target as HTMLElement);
+    for (const entry of entries) fitWord(entry.target as HTMLElement);
   });
   posters.forEach((poster) => observer.observe(poster));
   // Word widths depend on the web font, so refit once it has loaded.
   document.fonts.ready.then(() => posters.forEach(fitWord));
-  // Layers sampled from images (the Syllabuss book) appear once the image has decoded.
-  loadPatternImages().then(() => {
-    posters.forEach((poster) => {
-      if (!poster.querySelector('canvas[data-layer]')) return;
-      lastWidth.delete(poster);
-      render(poster);
-    });
-  });
 }

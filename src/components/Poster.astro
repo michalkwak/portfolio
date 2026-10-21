@@ -1,76 +1,47 @@
 ---
 import Callouts from './Callouts.astro';
-import Gojuon from './posters/Gojuon.astro';
-import MetroMap from './posters/MetroMap.astro';
-import type { Project } from '../data/projects';
+import PlateArt from './PlateArt.astro';
+import { LIVE_FIGURES, type Project } from '../data/projects';
 
 interface Props {
   project: Project;
 }
 
 const { project: p } = Astro.props;
-const word = p.word ?? '';
-const upright = /[぀-ヿ一-龯]/.test(word);
+const live = LIVE_FIGURES.includes(p.figure);
 // Fallback size for the vertical word; posters.ts fits it exactly once fonts load.
-const wordSize = upright ? 30 : Math.min(30, 118 / Math.max(1, [...word].length * 0.56));
-const style = [
-  `--bg: ${p.colors.bg}`,
-  `--ink: ${p.colors.ink}`,
-  `--art: ${p.colors.art ?? p.colors.ink}`,
-  p.colors.xrayBg && `--xray-bg: ${p.colors.xrayBg}`,
-  p.colors.xrayFg && `--xray-fg: ${p.colors.xrayFg}`,
-  `--word-size: ${wordSize.toFixed(2)}cqi`,
-]
-  .filter(Boolean)
-  .join('; ');
+const wordSize = p.word ? Math.min(30, 118 / ([...p.word].length * 0.56)) : 0;
+const style = p.colors && `--bg: ${p.colors.bg}; --ink: ${p.colors.ink}; --word-size: ${wordSize.toFixed(2)}cqi`;
 ---
 
-<article class:list={['poster', { featured: p.featured }]} style={style} data-lens data-id={p.id} data-live={p.live}>
-  {
-    p.live ? (
-      <canvas class="poster-art" aria-hidden="true" />
-    ) : (
-      <canvas
-        class="poster-art"
-        data-pattern={p.pattern}
-        data-ink={p.colors.art ?? p.colors.ink}
-        data-layer={p.layer}
-        data-layer-ink={p.layer && p.colors.ink}
-        aria-hidden="true"
-      />
-    )
-  }
+<article
+  class:list={['poster', p.featured ? 'featured' : 'plate']}
+  style={style}
+  data-lens
+  data-id={p.id}
+  data-live={live ? p.figure : undefined}
+>
+  {live ? <canvas class="poster-art" aria-hidden="true" /> : <PlateArt figure={p.figure} />}
 
   <div class="poster-face">
     <div class="poster-top">
       <span>{p.index} / {p.kind}</span>
       <span>{p.year}</span>
     </div>
-    {word && <span class:list={['poster-word', { upright }]} aria-hidden="true">{word}</span>}
+    {p.word && <span class="poster-word" aria-hidden="true">{p.word}</span>}
     {p.rule && <Callouts callouts={[]} rule={p.rule} />}
-    {p.overlay === 'gojuon' && <Gojuon mode="kana" />}
     <div class="poster-bottom">
       <h3>{p.title}</h3>
       {p.finding && <p class="poster-finding">{p.finding}</p>}
-      <p>{p.blurb}</p>
+      <p class="poster-blurb">{p.blurb}</p>
       <ul class="tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
     </div>
   </div>
 
   {
-    p.live ? (
+    live ? (
       <div class="xray" aria-hidden="true">
         <canvas class="xray-canvas" />
-      </div>
-    ) : p.overlay === 'metro' ? (
-      <div class="xray xray-key xray-metro" aria-hidden="true">
-        <p class="xray-label">Your degree as a route map — {p.index}</p>
-        <MetroMap />
-      </div>
-    ) : p.overlay === 'gojuon' ? (
-      <div class="xray xray-key" aria-hidden="true">
-        <p class="xray-label">Answer key — {p.index}</p>
-        <Gojuon mode="romaji" />
       </div>
     ) : (
       <div class="xray" aria-hidden="true">

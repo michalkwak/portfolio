@@ -578,10 +578,6 @@ main {
   rotate: 180deg;
 }
 
-.poster-word.upright {
-  rotate: none;
-}
-
 .poster-bottom {
   position: relative;
   margin: 0 -4.5cqi -4.5cqi;
@@ -654,135 +650,116 @@ main {
   height: 100%;
 }
 
-/* Kana Quest: the gojūon chart, and its answer key under the lens. */
-.gojuon {
-  position: absolute;
-  top: 12cqi;
-  left: 26cqi;
-  right: 5cqi;
-  height: 76cqi;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(11, 1fr);
-  font: 400 4.6cqi / 1 var(--serif);
-}
-
-.g-cell {
-  display: grid;
-  grid-auto-flow: column;
-  place-content: center;
-  align-items: baseline;
-  gap: 1.2cqi;
-  border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-}
-
-/* A paper halo keeps the kana legible over the halftone question. */
-.gojuon.kana .g-cell {
-  text-shadow: 0 0 0.2em var(--bg), 0 0 0.2em var(--bg), 0 0 0.4em var(--bg);
-}
-
-.gojuon .g-cell.q {
-  background: var(--art);
-  color: var(--bg);
-  text-shadow: none;
-}
-
-.poster .xray-key {
-  justify-content: flex-start;
-  padding: 4.5cqi;
-}
-
-.gojuon.romaji b {
-  color: var(--art);
-  font: 400 3.2cqi / 1 var(--serif);
-}
-
-.gojuon.romaji i {
-  font: 500 3cqi / 1 var(--mono);
-  font-style: normal;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.gojuon.romaji .q b {
-  color: var(--night);
-}
-
-/* Syllabuss: the degree as a metro map under the lens (the book is halftone, in patterns.ts). */
-.metro {
-  --core: #ff6b35;
-  --data: #2f55d4;
-  --math: #2e8b57;
-  --web: var(--ink);
-}
-
-.xray-metro .metro {
-  --bg: var(--night);
+/* Plates: dark and quiet, one hairline drawing each. Hover lights the drawing;
+   the lens shows the structure, lit lavender like the light in the hero. */
+.poster.plate {
+  --bg: #151413;
   --ink: var(--paper);
-  --data: #6f8ff0;
+  --xray-bg: var(--accent);
+  --xray-fg: var(--night);
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
 }
 
-.metro {
+.poster.plate .poster-top,
+.poster.plate .tags li {
+  color: var(--muted);
+}
+
+.poster.plate .tags li {
+  border-color: var(--line);
+}
+
+.poster.plate .poster-bottom h3 {
+  font-size: clamp(20px, 6.4cqi, 40px);
+}
+
+.poster.plate .poster-blurb {
+  display: none;
+}
+
+.plate-art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 
-.metro-line {
+.plate-art path {
   fill: none;
-  stroke-width: 6;
+  stroke: var(--accent);
+  stroke-width: 1.25;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
-.metro-line.core {
-  stroke: var(--core);
+.plate-art .muted {
+  stroke: var(--muted);
 }
 
-.metro-line.data {
-  stroke: var(--data);
+/* The book is drawn small, so its lines are a little heavier than a hairline. */
+.plate-art .book path {
+  stroke-width: 2;
 }
 
-.metro-line.math {
-  stroke: var(--math);
+.plate-art .dot {
+  fill: var(--accent);
 }
 
-.metro-line.web {
-  stroke: var(--web);
+/* The Jacobi grid: cells filled by size; the rotating pair is outlined in paper. */
+.plate-art .cell {
+  fill: var(--accent);
+  stroke: rgb(233 226 211 / 0.18);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition: fill-opacity 0.2s;
 }
 
-.metro-stop {
-  fill: var(--bg);
-  stroke: var(--ink);
-  stroke-width: 1.6;
+.plate-art .cell.diag {
+  stroke: var(--accent);
 }
 
-.metro-stop.interchange {
-  stroke-width: 2.2;
+.plate-art .cell.active {
+  stroke: var(--paper);
+  stroke-width: 1.5;
 }
 
-.metro-stop.terminus {
-  stroke-width: 2.6;
+.plate-label {
+  fill: var(--muted);
+  font: 500 8px var(--mono);
 }
 
-.metro-hub {
-  fill: var(--ink);
+.plate-check {
+  stroke-dasharray: 100;
 }
 
-.metro-label {
-  fill: var(--ink);
-  font: 500 6px var(--mono);
-  letter-spacing: 0.2px;
-  text-transform: uppercase;
-  paint-order: stroke;
-  stroke: var(--bg);
-  stroke-width: 3px;
-  stroke-linejoin: round;
+.plate-art,
+.poster.plate .poster-art {
+  transition: filter 0.4s;
 }
 
-.metro-label.major {
-  font-size: 8px;
+.poster.plate:hover .plate-art,
+.poster.plate:hover .poster-art,
+.poster.plate:focus-within .plate-art {
+  filter: drop-shadow(0 0 6px rgb(165 151 221 / 0.55));
+}
+
+.poster.plate:hover .plate-check {
+  animation: draw 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster.plate:hover .plate-check {
+    animation: none;
+  }
 }
 
 .poster-finding {
@@ -828,12 +805,6 @@ main {
   translate: 0 -50%;
   border-radius: 50%;
   background: currentColor;
-}
-
-.xray-finding {
-  max-width: 28ch;
-  margin: 0;
-  font: italic 400 clamp(18px, 5.2cqi, 34px) / 1.1 var(--serif);
 }
 
 /* ---------- About ---------- */
@@ -1183,6 +1154,64 @@ html:has(.project-view[open]) {
   .poster.featured {
     grid-column: auto;
     aspect-ratio: 3 / 4;
+    margin-bottom: var(--gutter);
+  }
+
+  /* The narrow card has no room for the description under its chart; the open view shows it. */
+  .poster.featured:not(.is-open) .poster-blurb {
+    display: none;
+  }
+
+  .posters {
+    gap: 0;
+  }
+
+  .poster.plate:not(.is-open) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 60px;
+    align-items: center;
+    gap: 16px;
+    aspect-ratio: auto;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+    background: none;
+    outline: 0;
+    overflow: visible;
+    container-type: normal;
+  }
+
+  .poster.plate:not(.is-open):last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .poster.plate:not(.is-open) .poster-face {
+    position: static;
+    grid-area: 1 / 1;
+    display: block;
+    padding: 0;
+  }
+
+  .poster.plate:not(.is-open) .poster-bottom {
+    margin: 0;
+    padding: 6px 0 0;
+    background: none;
+  }
+
+  .poster.plate:not(.is-open) .poster-bottom h3 {
+    margin: 0;
+    font-size: 26px;
+  }
+
+  .poster.plate:not(.is-open) .tags {
+    display: none;
+  }
+
+  .poster.plate:not(.is-open) .plate-art,
+  .poster.plate:not(.is-open) .poster-art {
+    position: static;
+    grid-area: 1 / 2;
+    width: 60px;
+    height: 80px;
   }
 
   .about-grid {
