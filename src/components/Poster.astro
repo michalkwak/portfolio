@@ -1,0 +1,69 @@
+---
+import Callouts from './Callouts.astro';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project: p } = Astro.props;
+const external = p.href.startsWith('http');
+const upright = /[぀-ヿ一-龯]/.test(p.word);
+// Size the vertical word so it runs about the full poster height (133cqi).
+const wordSize = upright ? 30 : Math.min(30, 118 / ([...p.word].length * 0.56));
+const style = [
+  `--bg: ${p.colors.bg}`,
+  `--ink: ${p.colors.ink}`,
+  p.colors.xrayBg && `--xray-bg: ${p.colors.xrayBg}`,
+  p.colors.xrayFg && `--xray-fg: ${p.colors.xrayFg}`,
+  `--word-size: ${wordSize.toFixed(2)}cqi`,
+]
+  .filter(Boolean)
+  .join('; ');
+---
+
+<a
+  class:list={['poster', { featured: p.featured }]}
+  href={p.href}
+  style={style}
+  data-lens
+  data-live={p.live}
+  {...external && { target: '_blank', rel: 'noopener' }}
+>
+  {
+    p.live ? (
+      <canvas class="poster-art" aria-hidden="true" />
+    ) : (
+      <canvas class="poster-art" data-pattern={p.pattern} data-ink={p.colors.ink} aria-hidden="true" />
+    )
+  }
+
+  <div class="poster-face">
+    <div class="poster-top">
+      <span>{p.index} / {p.kind}</span>
+      <span>{p.year}</span>
+    </div>
+    <span class:list={['poster-word', { upright }]} aria-hidden="true">{p.word}</span>
+    <Callouts callouts={p.callouts} rule={p.rule} />
+    <div class="poster-bottom">
+      <h3>{p.title}</h3>
+      {p.finding && <p class="poster-finding">{p.finding}</p>}
+      <p>{p.blurb}</p>
+      <ul class="tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
+    </div>
+  </div>
+
+  {
+    p.live ? (
+      <div class="xray" aria-hidden="true">
+        <canvas class="xray-canvas" />
+      </div>
+    ) : (
+      <div class="xray" aria-hidden="true">
+        <p class="xray-label">Structure — {p.index}</p>
+        <ol class="xray-steps">{p.structure.map((step) => <li>{step}</li>)}</ol>
+      </div>
+    )
+  }
+  <span class="lens-ring" aria-hidden="true"></span>
+</a>

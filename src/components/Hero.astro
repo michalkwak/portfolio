@@ -1,0 +1,52 @@
+---
+const links = [
+  { label: 'Email', value: 'michal.kwak2806@gmail.com', href: 'mailto:michal.kwak2806@gmail.com' },
+  { label: 'GitHub', value: 'michalkwak', href: 'https://github.com/michalkwak' },
+  { label: 'LinkedIn', value: 'in/michalkwak', href: 'https://linkedin.com/in/michalkwak' },
+  { label: 'CV', value: 'PDF, 2 pages', href: '/cv.pdf' },
+];
+---
+
+<header class="hero" id="top">
+  <!-- The light pillar (src/scripts/lightPillar.ts) mounts here, behind everything. -->
+  <div class="hero-pillar" id="pillar" aria-hidden="true"></div>
+
+  <h1 class="hero-name"><span>Michał</span> <span>Kwak</span></h1>
+
+  <div class="hero-stage">
+    <!-- The x-ray prints the same words as halftone dots over their line boxes. -->
+    <figure class="art hero-type" data-lens>
+      <p class="type-big">I build models,<br />then <em>check</em><br />whether to<br />believe them.</p>
+      <div class="xray type-xray" aria-hidden="true">
+        <p class="type-big">I build models,<br />then <em>check</em><br />whether to<br />believe them.</p>
+      </div>
+      <span class="lens-ring" aria-hidden="true"></span>
+      <figcaption>Fig. 01 — Instrument Serif in a column of light. Hover to see the halftone and the line boxes.</figcaption>
+    </figure>
+  </div>
+
+  <div class="hero-side">
+    <dl class="hero-meta">
+      <div><dt>Index</dt><dd>001 — 006</dd></div>
+      <div><dt>Based in</dt><dd>Helsinki, 60.17° N</dd></div>
+      <div><dt>Edition</dt><dd>Portfolio 2026</dd></div>
+    </dl>
+
+    <div class="hero-copy">
+      <p class="kicker">Computer &amp; Data Science<br />University of Helsinki</p>
+      <p class="status"><span class="pulse" aria-hidden="true"></span>Open to 2027 internships · ML, data science, medtech</p>
+      <ul class="links">
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} {...(l.href.startsWith('http') && { target: '_blank', rel: 'noopener' })}>
+                <span>{l.label}</span>
+                <span>{l.value} ↗</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</header>

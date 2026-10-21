@@ -1,0 +1,32 @@
+---
+import type { Callout } from '../data/projects';
+
+interface Props {
+  callouts: Callout[];
+  rule?: { y: number; label: string };
+}
+
+const { callouts, rule } = Astro.props;
+---
+
+<div class="callouts" aria-hidden="true">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    {rule && <line class="rule" x1="0" x2="100" y1={rule.y} y2={rule.y} vector-effect="non-scaling-stroke" />}
+    {
+      callouts.map(({ at, from }) => (
+        <line x1={from[0]} y1={from[1]} x2={at[0]} y2={at[1]} vector-effect="non-scaling-stroke" />
+      ))
+    }
+  </svg>
+  {rule && <span class="callout-label right" style={`left: 98.5%; top: ${rule.y}%`}>{rule.label}</span>}
+  {
+    callouts.map(({ label, at, from, align = 'left' }) => (
+      <>
+        <span class="callout-dot" style={`left: ${at[0]}%; top: ${at[1]}%`} />
+        <span class={`callout-label ${align}`} style={`left: ${from[0]}%; top: ${from[1]}%`}>
+          {label}
+        </span>
+      </>
+    ))
+  }
+</div>

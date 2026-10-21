@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Poster from '../components/Poster.astro';
+import Mirror from '../components/figures/Mirror.astro';
+import Spiral from '../components/figures/Spiral.astro';
+import { projects } from '../data/projects';
+---
+
+<Base
+  title="Michał Kwak"
+  description="Computer and Data Science student at the University of Helsinki. Machine learning, data pipelines and medtech research."
+>
+  <nav class="nav" aria-label="Main">
+    <a href="#top">MK — Portfolio 2026</a>
+    <ul>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="/cv.pdf">CV</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <Hero />
+
+  <main>
+    <section class="work" id="work">
+      <div class="section-head">
+        <h2>Index of work</h2>
+        <p>001 — 006<span class="hint"> · Hover a poster to x-ray it</span></p>
+      </div>
+      <div class="posters">
+        {projects.map((project) => <Poster project={project} />)}
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="section-head">
+        <h2>About</h2>
+        <p>Helsinki · since 2024</p>
+      </div>
+      <div class="about-intro">
+        <p class="about-lead">
+          I study Computer and Data Science in Helsinki. Lately most of my time goes into one question: when a model
+          says a glucose low is coming, <em>how much should you believe it?</em>
+        </p>
+        <Mirror />
+      </div>
+      <div class="about-grid">
+        <div>
+          <h3>Now</h3>
+          <ul>
+            <li>Thesis research on hypoglycaemia prediction from CGM data</li>
+            <li>Co-founder &amp; developer, Syllabuss (Helsinki Incubator)</li>
+            <li>International tutor coordinator, University of Helsinki</li>
+            <li>Ambassador, Study in Finland</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Before</h3>
+          <ul>
+            <li>Teaching assistant, Computer and Internet (spring 2026)</li>
+            <li>
+              Data Structures &amp; Algorithms I–II, Introduction to AI, Databases, Statistics &amp; R, Full Stack Web
+              Development, Software Engineering (Aalto)
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3>Languages</h3>
+          <ul>
+            <li>English — C2</li>
+            <li>Polish — native</li>
+            <li>Finnish — A1</li>
+            <li>Japanese — JLPT N5</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Off-screen</h3>
+          <ul>
+            <li>Visionary art, print design and music in odd time signatures.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="footer-main">
+      <div>
+        <p class="kicker">Say hello</p>
+        <a class="big-mail" href="mailto:michal.kwak2806@gmail.com">michal.kwak2806<wbr />@gmail.com</a>
+      </div>
+      <Spiral />
+    </div>
+    <div class="footer-row">
+      <span>60.1699° N, 24.9384° E</span>
+      <span>1 · 1 · 2 · 3 · 5 · 8 · 13</span>
+      <span>© 2026 Michał Kwak</span>
+    </div>
+  </footer>
+</Base>
+
+<script>
+  import { initPosters } from '../scripts/posters';
+  import { initLenses } from '../scripts/lens';
+  import { palette } from '../scripts/canvas';
+  import { createLightPillar } from '../scripts/lightPillar';
+  import { startGlucose } from '../scripts/figures/glucose';
+  import { startSqueeze } from '../scripts/figures/squeeze';
+  import { startSpiral } from '../scripts/figures/spiral';
+  import { startMirror } from '../scripts/figures/mirror';
+
+  const { night, paper, muted, accent } = palette();
+
+  initPosters();
+  initLenses();
+
+  // The hero's column of light, in the site's lavender fading to deep violet.
+  const pillar = document.getElementById('pillar');
+  if (pillar) {
+    createLightPillar(pillar, {
+      topColor: accent,
+      bottomColor: '#3b2f73',
+      intensity: 0.85,
+      glowAmount: 0.0022,
+      bloom: 0.35,
+      pillarWidth: 2.4,
+      pillarRotation: -16,
+      rotationSpeed: 0.25,
+      noiseIntensity: 0.7,
+      fade: 0.5,
+      quality: 'medium',
+    });
+  }
+
+  // Live posters: the figure is the art, and its x-ray is the lens layer.
+  document.querySelectorAll<HTMLElement>('.poster[data-live]').forEach((poster) => {
+    const styles = getComputedStyle(poster);
+    const bg = styles.getPropertyValue('--bg').trim();
+    const ink = styles.getPropertyValue('--ink').trim();
+    const base = poster.querySelector<HTMLCanvasElement>('.poster-art')!;
+    const xray = poster.querySelector<HTMLCanvasElement>('.xray-canvas')!;
+    const xrayColors = { xrayGround: night, xrayLine: bg, xrayMuted: muted, xrayPaper: paper };
+    if (poster.dataset.live === 'glucose') startGlucose(poster, base, xray, { line: ink, muted: `${ink}99`, ...xrayColors });
+    if (poster.dataset.live === 'squeeze') startSqueeze(poster, base, xray, { ink, ...xrayColors });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-figure]').forEach((figure) => {
+    if (figure.dataset.figure === 'spiral') startSpiral(figure);
+    if (figure.dataset.figure === 'mirror') startMirror(figure);
+  });
+</script>

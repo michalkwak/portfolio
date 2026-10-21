@@ -1,0 +1,20 @@
+---
+import Callouts from '../Callouts.astro';
+---
+
+<figure class="art art-mirror" data-figure="mirror" data-lens>
+  <canvas class="base" aria-hidden="true"></canvas>
+  <canvas class="xray depth-1" aria-hidden="true"></canvas>
+  <canvas class="xray depth-2" aria-hidden="true"></canvas>
+  <canvas class="xray depth-3" aria-hidden="true"></canvas>
+  <Callouts
+    callouts={[
+      { label: 'Halo', at: [58, 8], from: [99, 4], align: 'right' },
+      { label: 'Aura', at: [70, 46], from: [99, 38], align: 'right' },
+    ]}
+  />
+  <span class="lens-ring" data-label="Nerves" aria-hidden="true"></span>
+  <span class="lens-ring depth-2" data-label="Network" aria-hidden="true"></span>
+  <span class="lens-ring depth-3" data-label="Circuit" aria-hidden="true"></span>
+  <figcaption>Fig. 02 — After Alex Grey’s Sacred Mirrors. Hover to look through: nerves, network, circuit.</figcaption>
+</figure>

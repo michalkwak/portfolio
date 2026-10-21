@@ -1,0 +1,77 @@
+---
+import Callouts from '../Callouts.astro';
+
+// Fibonacci squares and the golden spiral, revealed by the x-ray lens.
+// Each square is placed right, down, left, then up of the tiling so far, and
+// carries a quarter arc so the arcs join into one spiral.
+const sizes = [1, 1, 2, 3, 5, 8, 13, 21, 34];
+const squares = [{ x: 0, y: 0, s: 1, dir: 3 }];
+let box = { x0: 0, y0: 0, x1: 1, y1: 1 };
+for (let k = 1; k < sizes.length; k++) {
+  const s = sizes[k];
+  const dir = (k - 1) % 4;
+  const [x, y] = [
+    [box.x1, box.y0],
+    [box.x0, box.y1],
+    [box.x0 - s, box.y0],
+    [box.x0, box.y0 - s],
+  ][dir];
+  squares.push({ x, y, s, dir });
+  box = {
+    x0: Math.min(box.x0, x),
+    y0: Math.min(box.y0, y),
+    x1: Math.max(box.x1, x + s),
+    y1: Math.max(box.y1, y + s),
+  };
+}
+
+const arcEnds = ({ x, y, s, dir }: (typeof squares)[number]) =>
+  [
+    [x, y, x + s, y + s],
+    [x + s, y, x, y + s],
+    [x + s, y + s, x, y],
+    [x, y + s, x + s, y],
+  ][dir];
+
+const [sx, sy] = arcEnds(squares[0]);
+const spiral = `M ${sx} ${sy} ` + squares.map((sq) => `A ${sq.s} ${sq.s} 0 0 1 ${arcEnds(sq)[2]} ${arcEnds(sq)[3]}`).join(' ');
+
+// Centre the view on the spiral's eye, so it lines up with the phyllotaxis.
+const eye = { x: 0.9, y: 0.7 };
+const half = Math.max(eye.x - box.x0, box.x1 - eye.x, eye.y - box.y0, box.y1 - eye.y);
+const viewBox = `${eye.x - half} ${eye.y - half} ${half * 2} ${half * 2}`;
+const discR = half * 0.96;
+const rays = Array.from({ length: 13 }, (_, k) => {
+  const a = k * Math.PI * (3 - Math.sqrt(5));
+  return { x: eye.x + discR * Math.cos(a), y: eye.y + discR * Math.sin(a) };
+});
+---
+
+<figure class="art art-spiral" data-figure="spiral" data-lens>
+  <canvas aria-hidden="true"></canvas>
+  <svg class="xray spiral-xray" viewBox={viewBox} aria-hidden="true">
+    <rect x={eye.x - half} y={eye.y - half} width={half * 2} height={half * 2} class="xray-fill" />
+    <circle cx={eye.x} cy={eye.y} r={discR} />
+    {rays.map((r) => <line x1={eye.x} y1={eye.y} x2={r.x} y2={r.y} class="ray" />)}
+    {squares.map((sq) => <rect x={sq.x} y={sq.y} width={sq.s} height={sq.s} />)}
+    <path d={spiral} class="spiral" />
+    {
+      squares
+        .filter((sq) => sq.s >= 3)
+        .map((sq) => (
+          <text x={sq.x + sq.s / 2} y={sq.y + sq.s / 2} font-size={sq.s * 0.22}>
+            {sq.s}
+          </text>
+        ))
+    }
+  </svg>
+  <Callouts
+    callouts={[
+      { label: 'θ = 137.508°', at: [58, 42], from: [99, 4], align: 'right' },
+      { label: 'N = 1 597', at: [24, 72], from: [1, 96] },
+      { label: 'φ = 1.618…', at: [74, 80], from: [99, 96], align: 'right' },
+    ]}
+  />
+  <span class="lens-ring" aria-hidden="true"></span>
+  <figcaption>Fig. 03 — 1 597 points at the golden angle. Hover to see the construction.</figcaption>
+</figure>
