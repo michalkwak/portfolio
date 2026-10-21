@@ -3,6 +3,8 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Poster from '../components/Poster.astro';
 import { projects } from '../data/projects';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <Base
@@ -14,7 +16,7 @@ import { projects } from '../data/projects';
     <ul>
       <li><a href="#work">Work</a></li>
       <li><a href="#about">About</a></li>
-      <li><a href="/cv.pdf">CV</a></li>
+      <li><a href={`${base}/cv.pdf`}>CV</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -152,12 +154,17 @@ import { projects } from '../data/projects';
   import { createLightPillar } from '../scripts/lightPillar';
   import { startGlucose } from '../scripts/figures/glucose';
   import { startSqueeze } from '../scripts/figures/squeeze';
+  import { startJacobi } from '../scripts/figures/jacobi';
 
   const { night, paper, muted, accent } = palette();
 
   initPosters();
   initLenses();
   initProjectView();
+
+  document.querySelectorAll<SVGSVGElement>('svg[data-jacobi]').forEach((svg) => {
+    startJacobi(svg, svg.closest<HTMLElement>('.poster')!);
+  });
 
   // The hero's column of light, in the site's lavender fading to deep violet.
   const pillar = document.getElementById('pillar');
@@ -177,15 +184,20 @@ import { projects } from '../data/projects';
     });
   }
 
-  // Live posters: the figure is the art, and its x-ray is the lens layer.
+  // Live figures: the canvas is the art, and its x-ray is the lens layer. The
+  // glucose poster takes its own colours; the squeeze plate is lit lavender
+  // on dark, with its x-ray in negative like every plate's.
   document.querySelectorAll<HTMLElement>('.poster[data-live]').forEach((poster) => {
-    const styles = getComputedStyle(poster);
-    const bg = styles.getPropertyValue('--bg').trim();
-    const ink = styles.getPropertyValue('--ink').trim();
     const base = poster.querySelector<HTMLCanvasElement>('.poster-art')!;
     const xray = poster.querySelector<HTMLCanvasElement>('.xray-canvas')!;
-    const xrayColors = { xrayGround: night, xrayLine: bg, xrayMuted: muted, xrayPaper: paper };
-    if (poster.dataset.live === 'glucose') startGlucose(poster, base, xray, { line: ink, muted: `${ink}99`, ...xrayColors });
-    if (poster.dataset.live === 'squeeze') startSqueeze(poster, base, xray, { ink, ...xrayColors });
+    if (poster.dataset.live === 'glucose') {
+      const styles = getComputedStyle(poster);
+      const bg = styles.getPropertyValue('--bg').trim();
+      const ink = styles.getPropertyValue('--ink').trim();
+      startGlucose(poster, base, xray, { line: ink, muted: `${ink}99`, xrayGround: night, xrayLine: bg, xrayMuted: muted, xrayPaper: paper });
+    }
+    if (poster.dataset.live === 'squeeze') {
+      startSqueeze(poster, base, xray, { line: accent, muted, xrayGround: accent, xrayLine: night, xrayMuted: `${night}66` });
+    }
   });
 </script>
