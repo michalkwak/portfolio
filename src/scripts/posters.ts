@@ -1,5 +1,5 @@
-import { drawHalftone } from './halftone';
-import { patterns } from './patterns';
+import { drawHalftone, paintHalftone } from './halftone';
+import { loadPatternImages, patterns } from './patterns';
 import type { Pattern } from '../data/projects';
 
 /** Sizes the vertical word to run from below the header to the caption band. */
@@ -27,11 +27,21 @@ export function initPosters() {
     fitWord(poster);
     const canvas = poster.querySelector<HTMLCanvasElement>('canvas[data-pattern]');
     if (!canvas) return;
-    drawHalftone(canvas, patterns[canvas.dataset.pattern as Pattern], {
+    const layer = canvas.dataset.layer as Pattern | undefined;
+    const cell = Math.min(10, Math.max(5, width / 64));
+    const fitted = drawHalftone(canvas, patterns[canvas.dataset.pattern as Pattern], {
       ink: canvas.dataset.ink ?? '#000',
-      cell: Math.min(10, Math.max(5, width / 64)),
+      cell,
       seed: canvas.dataset.pattern!.length,
     });
+    if (layer && fitted) {
+      paintHalftone(fitted.ctx, fitted.w, fitted.h, patterns[layer], {
+        ink: canvas.dataset.layerInk ?? '#000',
+        cell,
+        seed: 7,
+        grit: 0.04,
+      });
+    }
   };
 
   const observer = new ResizeObserver((entries) => {
@@ -40,4 +50,12 @@ export function initPosters() {
   posters.forEach((poster) => observer.observe(poster));
   // Word widths depend on the web font, so refit once it has loaded.
   document.fonts.ready.then(() => posters.forEach(fitWord));
+  // Layers sampled from images (the Syllabuss book) appear once the image has decoded.
+  loadPatternImages().then(() => {
+    posters.forEach((poster) => {
+      if (!poster.querySelector('canvas[data-layer]')) return;
+      lastWidth.delete(poster);
+      render(poster);
+    });
+  });
 }

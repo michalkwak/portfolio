@@ -35,8 +35,87 @@ const glucose: Field = (x, y, aspect) => {
   return v;
 };
 
-// --- 002: a river crossing behind the metro map ---
-const metro: Field = (x, y) => 0.32 * gauss(y - (0.5 - 0.3 * x), 0.045);
+// --- 002: ruled notebook paper behind the book, with a margin line ---
+const ruled: Field = (x, y, aspect) => {
+  const pitch = 1 / 24;
+  const rule = gauss(((y + pitch / 2) % pitch) - pitch / 2, 0.0035);
+  const margin = gauss((x - 0.12) * aspect, 0.004);
+  return Math.max(0.45 * rule, 0.7 * margin);
+};
+
+// --- 002, printed over the paper: the book from the Syllabuss logo ---
+// Placement in poster widths: right of the vertical word, its right page
+// running to the edge. Its pages are shaded darker toward the spine.
+const BOOK = { src: '/syllabuss-book.png', ratio: 237 / 296, left: 0.2, top: 0.15, width: 0.78 };
+let bookImage: HTMLImageElement | undefined;
+
+/** Loads the images fields sample from; posters redraw once it resolves. */
+export function loadPatternImages() {
+  const image = new Image();
+  image.src = BOOK.src;
+  return image
+    .decode()
+    .then(() => void (bookImage = image))
+    .catch(() => {});
+}
+
+/** Separable box blur, run twice for a softer, almost Gaussian falloff. */
+function blur(src: Float32Array, w: number, h: number, r: number) {
+  let a = src;
+  for (let pass = 0; pass < 2; pass++) {
+    const b = new Float32Array(a.length);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let sum = 0;
+        for (let k = -r; k <= r; k++) sum += a[y * w + Math.min(w - 1, Math.max(0, x + k))];
+        b[y * w + x] = sum / (2 * r + 1);
+      }
+    }
+    const c = new Float32Array(a.length);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let sum = 0;
+        for (let k = -r; k <= r; k++) sum += b[Math.min(h - 1, Math.max(0, y + k)) * w + x];
+        c[y * w + x] = sum / (2 * r + 1);
+      }
+    }
+    a = c;
+  }
+  return a;
+}
+
+const book: Field = (() => {
+  let cache: { aspect: number; w: number; h: number; ink: Float32Array; halo: Float32Array } | undefined;
+  return (x, y, aspect) => {
+    if (!bookImage) return 0;
+    if (!cache || cache.aspect !== aspect) {
+      const w = 480;
+      const h = Math.round(w / aspect);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(bookImage, BOOK.left * w, BOOK.top * w, BOOK.width * w, BOOK.width * BOOK.ratio * w);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const ink = new Float32Array(w * h);
+      for (let i = 0; i < ink.length; i++) ink[i] = data[i * 4 + 3] / 255;
+      cache = { aspect, w, h, ink, halo: blur(ink, w, h, 6) };
+    }
+    const i = Math.floor(x * cache.w);
+    const j = Math.floor(y * cache.h);
+    if (i < 0 || j < 0 || i >= cache.w || j >= cache.h) return 0;
+    const k = j * cache.w + i;
+
+    // Book-local coordinates, for the page shading.
+    const u = (x - BOOK.left) / BOOK.width;
+    const v = (y / aspect - BOOK.top) / (BOOK.width * BOOK.ratio);
+    const onLeftPage = u > 0.12 && u < 0.53 && v > 0.04 && v < 0.92;
+    const onRightPage = u >= 0.53 && u < 0.96 && v > 0.04 && v < 0.8;
+    const shade = onLeftPage || onRightPage ? 0.08 + 0.32 * Math.exp(-Math.abs(u - 0.53) / 0.09) : 0;
+
+    return Math.max(cache.ink[k], Math.min(0.3, cache.halo[k]), shade);
+  };
+})();
 
 // --- 003: a ghostly eigenface ---
 const eigen: Field = (x, y, aspect) => {
@@ -133,7 +212,8 @@ const kana: Field = (x, y, aspect) => question(x, y, aspect) * (0.6 - 0.35 * y);
 
 export const patterns: Record<Pattern, Field> = {
   glucose,
-  metro,
+  ruled,
+  book,
   eigen,
   squeeze,
   finland: finlandField,

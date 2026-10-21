@@ -44,9 +44,11 @@ export function paintHalftone(ctx: CanvasRenderingContext2D, w: number, h: numbe
   ctx.fill();
 }
 
-/** Sizes the canvas to its box, then paints the field once. */
+/** Sizes the canvas to its box, then paints the field once. Returns the
+ * context so further layers can be printed on top. */
 export function drawHalftone(canvas: HTMLCanvasElement, field: Field, opts: HalftoneOptions) {
-  const { ctx, w, h } = fitCanvas(canvas);
-  if (!w || !h) return;
-  paintHalftone(ctx, w, h, field, opts);
+  const fitted = fitCanvas(canvas);
+  if (!fitted.w || !fitted.h) return;
+  paintHalftone(fitted.ctx, fitted.w, fitted.h, field, opts);
+  return fitted;
 }

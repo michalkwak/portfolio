@@ -4,15 +4,15 @@
 // whose own x-ray replaces the structure list.
 import { LOW_LINE_PERCENT } from '../scripts/figures/glucose';
 
-export type Pattern = 'glucose' | 'metro' | 'eigen' | 'squeeze' | 'finland' | 'kana';
+export type Pattern = 'glucose' | 'ruled' | 'book' | 'eigen' | 'squeeze' | 'finland' | 'kana';
 
 export interface Project {
   id: string;
   index: string;
   kind: string;
   year: string;
-  /** The giant vertical word. */
-  word: string;
+  /** The giant vertical word; left out when the art already names the project. */
+  word?: string;
   title: string;
   blurb: string;
   tags: string[];
@@ -26,7 +26,9 @@ export interface Project {
   /** Headline result, printed on the poster. */
   finding?: string;
   live?: 'glucose' | 'squeeze';
-  /** A drawn layer over the art, with its own x-ray (src/components/posters/). */
+  /** A second halftone, printed over `pattern` in the text ink. */
+  layer?: Pattern;
+  /** A drawn layer and/or its own x-ray (src/components/posters/). */
   overlay?: 'metro' | 'gojuon';
   featured?: boolean;
 }
@@ -70,9 +72,10 @@ export const projects: Project[] = [
     blurb: 'Co-founder and developer of a study-planning platform that makes degree structures navigable.',
     tags: ['Full-stack', 'Git', 'User research'],
     href: '#work',
-    pattern: 'metro',
+    pattern: 'ruled',
+    layer: 'book',
     overlay: 'metro',
-    colors: { bg: '#ece6da', ink: '#151210', art: '#5b7fd0' },
+    colors: { bg: '#f3c623', ink: '#151210', art: '#b98f0c' },
     structure: [
       'degree structure data',
       'backend tools for processing it',
@@ -86,8 +89,8 @@ export const projects: Project[] = [
     index: '003',
     kind: 'Algorithms',
     year: '2026',
-    word: 'Eigen',
-    title: 'Face recognition with a hand-written Jacobi solver',
+    word: 'Eigenfaces',
+    title: 'Face recognition',
     blurb: 'Eigenfaces on top of a cyclic Jacobi eigendecomposition written from scratch, with unit and end-to-end tests.',
     tags: ['Python', 'NumPy', 'Testing'],
     href: `${GITHUB}/Face-Recognition`,

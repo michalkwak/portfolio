@@ -2,8 +2,6 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Poster from '../components/Poster.astro';
-import Mirror from '../components/figures/Mirror.astro';
-import Spiral from '../components/figures/Spiral.astro';
 import { projects } from '../data/projects';
 ---
 
@@ -27,7 +25,7 @@ import { projects } from '../data/projects';
     <section class="work" id="work">
       <div class="section-head">
         <h2>Index of work</h2>
-        <p>001 — 006<span class="hint"> · Hover a poster to x-ray it</span></p>
+        <p>001 — 006 · <span class="hint">Hover to x-ray · </span>Click a poster to open it</p>
       </div>
       <div class="posters">
         {projects.map((project) => <Poster project={project} />)}
@@ -39,13 +37,10 @@ import { projects } from '../data/projects';
         <h2>About</h2>
         <p>Helsinki · since 2024</p>
       </div>
-      <div class="about-intro">
-        <p class="about-lead">
-          I study Computer and Data Science in Helsinki. Lately most of my time goes into one question: when a model
-          says a glucose low is coming, <em>how much should you believe it?</em>
-        </p>
-        <Mirror />
-      </div>
+      <p class="about-lead">
+        I study Computer and Data Science in Helsinki. Lately most of my time goes into one question: when a model says
+        a glucose low is coming, <em>how much should you believe it?</em>
+      </p>
       <div class="about-grid">
         <div>
           <h3>Now</h3>
@@ -85,14 +80,62 @@ import { projects } from '../data/projects';
     </section>
   </main>
 
-  <footer class="footer" id="contact">
-    <div class="footer-main">
-      <div>
-        <p class="kicker">Say hello</p>
-        <a class="big-mail" href="mailto:michal.kwak2806@gmail.com">michal.kwak2806<wbr />@gmail.com</a>
+  <dialog class="project-view" id="project-view" aria-labelledby="pv-title">
+    <div class="pv-stage">
+      <div class="pv-frame">
+        <div class="pv-slot"></div>
+        <input class="pv-split" type="range" min="0" max="100" value="50" aria-label="Compare the poster with its x-ray" />
       </div>
-      <Spiral />
+      <div class="pv-legend" aria-hidden="true">
+        <span>← Surface</span>
+        <span>Drag to compare</span>
+        <span>X-ray →</span>
+      </div>
     </div>
+    <div class="pv-info">
+      <div class="pv-bar">
+        <p class="kicker" id="pv-meta"></p>
+        <button class="pv-close" type="button" autofocus>Close <span aria-hidden="true">✕</span></button>
+      </div>
+      <h2 id="pv-title"></h2>
+      <p class="pv-finding" id="pv-finding"></p>
+      <p class="pv-blurb" id="pv-blurb"></p>
+      <h3 class="kicker">How it’s built</h3>
+      <ol class="pv-steps" id="pv-steps"></ol>
+      <ul class="tags" id="pv-tags"></ul>
+      <a class="pv-link" id="pv-link" target="_blank" rel="noopener">View on GitHub ↗</a>
+      <p class="pv-soon" id="pv-soon">Case study coming soon</p>
+      <nav class="pv-nav" aria-label="Projects">
+        <button type="button" data-step="-1">← Previous</button>
+        <span id="pv-count"></span>
+        <button type="button" data-step="1">Next →</button>
+      </nav>
+    </div>
+  </dialog>
+
+  <script
+    is:inline
+    type="application/json"
+    id="project-data"
+    set:html={JSON.stringify(
+      projects.map(({ id, index, kind, year, title, blurb, finding, structure, tags, href }) => ({
+        id,
+        index,
+        kind,
+        year,
+        title,
+        blurb,
+        finding,
+        structure,
+        tags,
+        href,
+      })),
+    )}
+  />
+
+  <footer class="footer" id="contact">
+    <p class="kicker">Say hello</p>
+    <a class="big-mail" href="mailto:michal.kwak2806@gmail.com">michal.kwak2806<wbr />@gmail.com</a>
     <div class="footer-row">
       <span>60.1699° N, 24.9384° E</span>
       <span>1 · 1 · 2 · 3 · 5 · 8 · 13</span>
@@ -104,17 +147,17 @@ import { projects } from '../data/projects';
 <script>
   import { initPosters } from '../scripts/posters';
   import { initLenses } from '../scripts/lens';
+  import { initProjectView } from '../scripts/projectView';
   import { palette } from '../scripts/canvas';
   import { createLightPillar } from '../scripts/lightPillar';
   import { startGlucose } from '../scripts/figures/glucose';
   import { startSqueeze } from '../scripts/figures/squeeze';
-  import { startSpiral } from '../scripts/figures/spiral';
-  import { startMirror } from '../scripts/figures/mirror';
 
   const { night, paper, muted, accent } = palette();
 
   initPosters();
   initLenses();
+  initProjectView();
 
   // The hero's column of light, in the site's lavender fading to deep violet.
   const pillar = document.getElementById('pillar');
@@ -144,10 +187,5 @@ import { projects } from '../data/projects';
     const xrayColors = { xrayGround: night, xrayLine: bg, xrayMuted: muted, xrayPaper: paper };
     if (poster.dataset.live === 'glucose') startGlucose(poster, base, xray, { line: ink, muted: `${ink}99`, ...xrayColors });
     if (poster.dataset.live === 'squeeze') startSqueeze(poster, base, xray, { ink, ...xrayColors });
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-figure]').forEach((figure) => {
-    if (figure.dataset.figure === 'spiral') startSpiral(figure);
-    if (figure.dataset.figure === 'mirror') startMirror(figure);
   });
 </script>

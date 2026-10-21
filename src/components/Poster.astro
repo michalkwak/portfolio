@@ -2,7 +2,6 @@
 import Callouts from './Callouts.astro';
 import Gojuon from './posters/Gojuon.astro';
 import MetroMap from './posters/MetroMap.astro';
-import Timetable from './posters/Timetable.astro';
 import type { Project } from '../data/projects';
 
 interface Props {
@@ -10,10 +9,10 @@ interface Props {
 }
 
 const { project: p } = Astro.props;
-const external = p.href.startsWith('http');
-const upright = /[぀-ヿ一-龯]/.test(p.word);
-// Size the vertical word so it runs about the full poster height (133cqi).
-const wordSize = upright ? 30 : Math.min(30, 118 / ([...p.word].length * 0.56));
+const word = p.word ?? '';
+const upright = /[぀-ヿ一-龯]/.test(word);
+// Fallback size for the vertical word; posters.ts fits it exactly once fonts load.
+const wordSize = upright ? 30 : Math.min(30, 118 / Math.max(1, [...word].length * 0.56));
 const style = [
   `--bg: ${p.colors.bg}`,
   `--ink: ${p.colors.ink}`,
@@ -26,19 +25,19 @@ const style = [
   .join('; ');
 ---
 
-<a
-  class:list={['poster', { featured: p.featured }]}
-  href={p.href}
-  style={style}
-  data-lens
-  data-live={p.live}
-  {...external && { target: '_blank', rel: 'noopener' }}
->
+<article class:list={['poster', { featured: p.featured }]} style={style} data-lens data-id={p.id} data-live={p.live}>
   {
     p.live ? (
       <canvas class="poster-art" aria-hidden="true" />
     ) : (
-      <canvas class="poster-art" data-pattern={p.pattern} data-ink={p.colors.art ?? p.colors.ink} aria-hidden="true" />
+      <canvas
+        class="poster-art"
+        data-pattern={p.pattern}
+        data-ink={p.colors.art ?? p.colors.ink}
+        data-layer={p.layer}
+        data-layer-ink={p.layer && p.colors.ink}
+        aria-hidden="true"
+      />
     )
   }
 
@@ -47,9 +46,8 @@ const style = [
       <span>{p.index} / {p.kind}</span>
       <span>{p.year}</span>
     </div>
-    <span class:list={['poster-word', { upright }]} aria-hidden="true">{p.word}</span>
+    {word && <span class:list={['poster-word', { upright }]} aria-hidden="true">{word}</span>}
     {p.rule && <Callouts callouts={[]} rule={p.rule} />}
-    {p.overlay === 'metro' && <MetroMap />}
     {p.overlay === 'gojuon' && <Gojuon mode="kana" />}
     <div class="poster-bottom">
       <h3>{p.title}</h3>
@@ -65,12 +63,13 @@ const style = [
         <canvas class="xray-canvas" />
       </div>
     ) : p.overlay === 'metro' ? (
-      <div class="xray" aria-hidden="true">
-        <Timetable />
+      <div class="xray xray-key xray-metro" aria-hidden="true">
+        <p class="xray-label">Your degree as a route map — {p.index}</p>
+        <MetroMap />
       </div>
     ) : p.overlay === 'gojuon' ? (
       <div class="xray xray-key" aria-hidden="true">
-        <p class="xray-label">Answer key — 006</p>
+        <p class="xray-label">Answer key — {p.index}</p>
         <Gojuon mode="romaji" />
       </div>
     ) : (
@@ -81,4 +80,6 @@ const style = [
     )
   }
   <span class="lens-ring" aria-hidden="true"></span>
-</a>
+  <!-- Covers the poster; opens it in the project view (src/scripts/projectView.ts). -->
+  <button class="poster-hit" type="button" aria-label={`Open ${p.title}`} aria-haspopup="dialog"></button>
+</article>

@@ -294,70 +294,6 @@ h3 {
   height: 100%;
 }
 
-/* ---------- Figures: square canvases with a lens ---------- */
-
-.art {
-  --lens: 130px;
-  --ring: var(--accent);
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  margin: 0;
-  color: var(--muted);
-}
-
-.art canvas,
-.art .xray {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.art figcaption {
-  position: absolute;
-  top: calc(100% + 14px);
-  left: 0;
-  right: 0;
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
-}
-
-.spiral-xray .xray-fill {
-  fill: var(--night);
-  stroke: none;
-}
-
-.spiral-xray circle,
-.spiral-xray rect:not(.xray-fill),
-.spiral-xray line {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  opacity: 0.7;
-}
-
-.spiral-xray .ray {
-  stroke-dasharray: 3 5;
-  opacity: 0.4;
-}
-
-.spiral-xray .spiral {
-  fill: none;
-  stroke: var(--paper);
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-}
-
-.spiral-xray text {
-  fill: var(--accent);
-  font-family: var(--mono);
-  text-anchor: middle;
-  dominant-baseline: central;
-}
-
 /* Text hero, set over the light pillar. */
 .type-big {
   margin: 0;
@@ -369,51 +305,6 @@ h3 {
 
 .type-big em {
   color: var(--accent);
-}
-
-/* Sacred Mirrors: three nested lenses, nerves → network → circuit. */
-.art-mirror {
-  --lens: 160px;
-}
-
-.art-mirror .xray.depth-2 {
-  -webkit-mask-image: radial-gradient(circle calc(var(--r) * 0.64) at var(--x) var(--y), #000 99%, transparent 100%);
-  mask-image: radial-gradient(circle calc(var(--r) * 0.64) at var(--x) var(--y), #000 99%, transparent 100%);
-}
-
-.art-mirror .xray.depth-3 {
-  -webkit-mask-image: radial-gradient(circle calc(var(--r) * 0.32) at var(--x) var(--y), #000 99%, transparent 100%);
-  mask-image: radial-gradient(circle calc(var(--r) * 0.32) at var(--x) var(--y), #000 99%, transparent 100%);
-}
-
-.lens-ring.depth-2 {
-  width: calc(var(--r) * 1.28);
-  height: calc(var(--r) * 1.28);
-}
-
-.lens-ring.depth-3 {
-  width: calc(var(--r) * 0.64);
-  height: calc(var(--r) * 0.64);
-}
-
-.lens-ring[data-label]::after {
-  content: attr(data-label);
-}
-
-.lens-ring.depth-2::after {
-  top: 50%;
-  left: 100%;
-  translate: 6px -50%;
-}
-
-.lens-ring.depth-3::after {
-  top: auto;
-  bottom: 100%;
-  translate: -50% -5px;
-}
-
-.art-spiral {
-  --lens: 90px;
 }
 
 .hero-side {
@@ -575,10 +466,77 @@ main {
   aspect-ratio: auto;
 }
 
-.poster:focus-visible {
-  --r: 2000px;
-  outline-color: var(--paper);
-  outline-offset: 4px;
+/* A transparent button over the whole poster opens the project view. */
+.poster-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.poster-hit:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -6px;
+}
+
+/* Holds a poster's place in the grid while it is open. */
+.poster.poster-ghost {
+  background: none;
+  outline: 1px dashed var(--line);
+  outline-offset: -1px;
+}
+
+/* Open: the x-ray shows right of a draggable split instead of in a lens. */
+.poster.is-open {
+  --split: 50%;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.poster.is-open .xray {
+  -webkit-mask-image: linear-gradient(to right, transparent var(--split), #000 var(--split));
+  mask-image: linear-gradient(to right, transparent var(--split), #000 var(--split));
+}
+
+.poster.is-open .poster-hit,
+.poster.is-open .lens-ring {
+  display: none;
+}
+
+.poster.is-open::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--split);
+  z-index: 3;
+  width: 2px;
+  translate: -1px 0;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.poster.is-open::before {
+  content: '‹ ›';
+  position: absolute;
+  top: 50%;
+  left: var(--split);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--night);
+  font: 500 16px / 1 var(--mono);
+  pointer-events: none;
 }
 
 .poster-art {
@@ -729,7 +687,7 @@ main {
   text-shadow: none;
 }
 
-.xray-key {
+.poster .xray-key {
   justify-content: flex-start;
   padding: 4.5cqi;
 }
@@ -750,13 +708,18 @@ main {
   color: var(--night);
 }
 
-/* Syllabuss: the degree as a metro map, and its timetable under the lens. */
-.metro,
-.timetable {
+/* Syllabuss: the degree as a metro map under the lens (the book is halftone, in patterns.ts). */
+.metro {
   --core: #ff6b35;
   --data: #2f55d4;
   --math: #2e8b57;
   --web: var(--ink);
+}
+
+.xray-metro .metro {
+  --bg: var(--night);
+  --ink: var(--paper);
+  --data: #6f8ff0;
 }
 
 .metro {
@@ -822,64 +785,6 @@ main {
   font-size: 8px;
 }
 
-.timetable {
-  --data: #7b98f2;
-  --math: #4fbf86;
-  --web: var(--paper);
-  width: 100%;
-  border-collapse: collapse;
-  font: 500 clamp(9px, 2.5cqi, 12px) / 1.3 var(--mono);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.timetable th,
-.timetable td {
-  padding: 1.4cqi 1cqi;
-  border-bottom: 1px solid color-mix(in srgb, currentColor 28%, transparent);
-  text-align: left;
-  vertical-align: top;
-}
-
-.timetable th {
-  font-weight: 500;
-  opacity: 0.7;
-}
-
-.chip {
-  position: relative;
-  display: block;
-  margin-bottom: 0.9cqi;
-  padding-left: 2.4cqi;
-}
-
-.chip::before {
-  content: '';
-  position: absolute;
-  top: 0.3em;
-  left: 0;
-  width: 1.3cqi;
-  height: 1.3cqi;
-  border-radius: 50%;
-  background: var(--c, var(--muted));
-}
-
-.chip.core {
-  --c: var(--core);
-}
-
-.chip.data {
-  --c: var(--data);
-}
-
-.chip.math {
-  --c: var(--math);
-}
-
-.chip.web {
-  --c: var(--web);
-}
-
 .poster-finding {
   max-width: 34ch;
   margin: 0 0 0.8em;
@@ -937,17 +842,9 @@ main {
   padding: 12vh var(--gutter);
 }
 
-.about-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 34rem);
-  align-items: center;
-  gap: var(--gutter);
-  margin-bottom: clamp(5rem, 14vh, 9rem);
-}
-
 .about-lead {
   max-width: 30ch;
-  margin: 0;
+  margin: 0 0 clamp(3rem, 8vh, 6rem);
   font: 400 clamp(1.8rem, 3.6vw, 3.4rem) / 1.08 var(--serif);
 }
 
@@ -976,6 +873,194 @@ main {
   font-size: 13px;
 }
 
+/* ---------- Project view (src/scripts/projectView.ts) ---------- */
+
+html:has(.project-view[open]) {
+  overflow: hidden;
+}
+
+.project-view {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 64px var(--gutter) var(--gutter);
+  border: 0;
+  background: var(--night);
+  color: var(--paper);
+  overflow: auto;
+}
+
+.project-view[open] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 30rem);
+  justify-content: center;
+  align-items: center;
+  gap: clamp(24px, 4vw, 72px);
+}
+
+.project-view::backdrop {
+  background: none;
+}
+
+.pv-frame {
+  position: relative;
+  height: min(78svh, 900px);
+  aspect-ratio: 3 / 4;
+}
+
+.pv-slot {
+  position: absolute;
+  inset: 0;
+}
+
+.pv-split {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+.pv-frame:has(.pv-split:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.pv-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  color: var(--muted);
+  font: 500 10px / 1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pv-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.pv-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pv-info button {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--paper);
+  font: 500 11px / 1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.pv-info button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pv-info h2 {
+  margin: 0;
+  font: 400 clamp(2.2rem, 3.6vw, 3.6rem) / 1 var(--serif);
+  text-wrap: balance;
+}
+
+.pv-finding {
+  margin: 0;
+  color: var(--accent);
+  font: italic 400 clamp(1.2rem, 1.6vw, 1.5rem) / 1.2 var(--serif);
+}
+
+.pv-blurb {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pv-info h3 {
+  margin: 0.6rem 0 0;
+}
+
+.pv-steps {
+  counter-reset: step;
+  font-size: 13px;
+}
+
+.pv-steps li {
+  display: flex;
+  gap: 1em;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  counter-increment: step;
+}
+
+.pv-steps li::before {
+  content: counter(step, decimal-leading-zero);
+  color: var(--muted);
+}
+
+.pv-link {
+  align-self: flex-start;
+  color: var(--accent);
+  font-size: 13px;
+  text-underline-offset: 4px;
+}
+
+.pv-soon {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pv-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+::view-transition-group(poster-open) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (max-width: 900px) {
+  .project-view[open] {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    padding-top: 56px;
+  }
+
+  .pv-stage {
+    justify-self: center;
+    width: min(100%, 70svh * 0.75);
+  }
+
+  .pv-frame {
+    width: 100%;
+    height: auto;
+  }
+}
+
 /* ---------- Footer ---------- */
 
 .footer {
@@ -983,17 +1068,9 @@ main {
   border-top: 1px solid var(--line);
 }
 
-.footer-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 320px);
-  align-items: end;
-  gap: var(--gutter);
-  margin-bottom: 14vh;
-}
-
 .big-mail {
   display: inline-block;
-  margin-top: 1rem;
+  margin: 1rem 0 12vh;
   font: 400 clamp(2.4rem, 5.8vw, 6.5rem) / 0.95 var(--serif);
   text-decoration: none;
   overflow-wrap: anywhere;
@@ -1015,7 +1092,7 @@ main {
   text-transform: uppercase;
 }
 
-/* ---------- Touch: no hover, so figure lenses drift by themselves ---------- */
+/* ---------- Touch: no hover, so the lens gives way to the project view ---------- */
 
 @media (hover: none) {
   .poster .xray,
@@ -1024,42 +1101,8 @@ main {
     display: none;
   }
 
-  .art {
-    --r: 70px;
-  }
-
-  .art .lens-ring {
-    opacity: 1;
-  }
-
-  .art figcaption {
-    display: none;
-  }
-}
-
-@media (hover: none) and (prefers-reduced-motion: no-preference) {
-  .art {
-    animation: drift 16s linear infinite;
-  }
-}
-
-@keyframes drift {
-  0%,
-  100% {
-    --x: 32%;
-    --y: 36%;
-  }
-  25% {
-    --x: 68%;
-    --y: 30%;
-  }
-  50% {
-    --x: 70%;
-    --y: 66%;
-  }
-  75% {
-    --x: 34%;
-    --y: 70%;
+  .poster.is-open .xray {
+    display: flex;
   }
 }
 
@@ -1123,7 +1166,6 @@ main {
     display: block;
   }
 
-
   .type-big {
     font-size: 14vw;
   }
@@ -1144,11 +1186,6 @@ main {
   }
 
   .about-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .about-intro,
-  .footer-main {
     grid-template-columns: minmax(0, 1fr);
   }
 }
