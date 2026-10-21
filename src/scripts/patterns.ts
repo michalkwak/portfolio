@@ -6,13 +6,6 @@ import type { Pattern } from '../data/projects';
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const gauss = (d: number, s: number) => Math.exp(-(d * d) / (s * s));
 
-function segmentDistance(px: number, py: number, ax: number, ay: number, bx: number, by: number) {
-  const dx = bx - ax;
-  const dy = by - ay;
-  const t = clamp01(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy));
-  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
-}
-
 // --- 001: CGM traces dipping below the 70 mg/dL line (at 70 % height) ---
 const LOW_Y = 0.7;
 const traces = (() => {
@@ -42,29 +35,8 @@ const glucose: Field = (x, y, aspect) => {
   return v;
 };
 
-// --- 002: a course-prerequisite graph ---
-const nodes: [number, number][] = [
-  [0.25, 0.12], [0.55, 0.12], [0.8, 0.12],
-  [0.18, 0.28], [0.42, 0.28], [0.7, 0.28],
-  [0.3, 0.44], [0.6, 0.44], [0.85, 0.44],
-  [0.22, 0.6], [0.5, 0.6], [0.75, 0.6],
-];
-const edges: [number, number][] = [
-  [0, 3], [0, 4], [1, 4], [1, 5], [2, 5], [3, 6], [4, 6], [4, 7],
-  [5, 8], [6, 9], [7, 10], [7, 9], [8, 10], [8, 11],
-];
-
-const graph: Field = (x, y, aspect) => {
-  const px = x * aspect;
-  let v = 0;
-  for (const [a, b] of edges) {
-    const [ax, ay] = nodes[a];
-    const [bx, by] = nodes[b];
-    v = Math.max(v, 0.75 * gauss(segmentDistance(px, y, ax * aspect, ay, bx * aspect, by), 0.01));
-  }
-  for (const [nx, ny] of nodes) v = Math.max(v, gauss(Math.hypot(px - nx * aspect, y - ny), 0.034));
-  return v;
-};
+// --- 002: a river crossing behind the metro map ---
+const metro: Field = (x, y) => 0.32 * gauss(y - (0.5 - 0.3 * x), 0.045);
 
 // --- 003: a ghostly eigenface ---
 const eigen: Field = (x, y, aspect) => {
@@ -128,35 +100,42 @@ const finlandField: Field = (x, y, aspect) => {
   return 0.3 + 0.4 * wave + 0.25 * ((70 - lat) / 10);
 };
 
-// --- 006: two koi in rippling water ---
-const fish = [
-  { x0: 0.62, y0: 0.12, len: 0.5, amp: 0.1, phase: 0, width: 0.075 },
-  { x0: 0.36, y0: 0.42, len: 0.4, amp: 0.08, phase: 2.4, width: 0.065 },
-];
+// --- 006: the quiz question, one huge kana fading down the poster ---
+/** Shared with Gojuon.astro, which highlights it in the grid. */
+export const KANA_QUESTION = 'ね';
 
-const koi: Field = (x, y, aspect) => {
-  const water = Math.sin(Math.hypot((x - 0.3) * aspect, y - 0.2) * 70) * Math.sin(Math.hypot((x - 0.8) * aspect, y - 0.7) * 55);
-  let v = 0.18 + 0.12 * water;
-  for (const f of fish) {
-    let best = Infinity;
-    for (let i = 0; i <= 40; i++) {
-      const t = i / 40;
-      const cx = f.x0 + f.amp * Math.sin(t * Math.PI * 1.6 + f.phase);
-      const cy = f.y0 + t * f.len;
-      const width = f.width * (1 - t) ** 0.8 * Math.min(1, t * 6 + 0.4);
-      if (width <= 0) continue;
-      best = Math.min(best, Math.hypot((x - cx) * aspect, y - cy) / width);
+/** Rasterises one glyph once per aspect ratio and samples its coverage. */
+function glyph(char: string, cx: number, cy: number, size: number): Field {
+  let cache: { aspect: number; w: number; h: number; alpha: Uint8ClampedArray } | undefined;
+  return (x, y, aspect) => {
+    if (!cache || cache.aspect !== aspect) {
+      const w = 360;
+      const h = Math.round(w / aspect);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d')!;
+      ctx.font = `400 ${size * h}px 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(char, cx * w, cy * h);
+      cache = { aspect, w, h, alpha: ctx.getImageData(0, 0, w, h).data };
     }
-    v = Math.max(v, 1.25 - best ** 3);
-  }
-  return v;
-};
+    const i = Math.floor(x * cache.w);
+    const j = Math.floor(y * cache.h);
+    if (i < 0 || j < 0 || i >= cache.w || j >= cache.h) return 0;
+    return cache.alpha[(j * cache.w + i) * 4 + 3] / 255;
+  };
+}
+
+const question = glyph(KANA_QUESTION, 0.6, 0.38, 0.7);
+const kana: Field = (x, y, aspect) => question(x, y, aspect) * (0.6 - 0.35 * y);
 
 export const patterns: Record<Pattern, Field> = {
   glucose,
-  graph,
+  metro,
   eigen,
   squeeze,
   finland: finlandField,
-  koi,
+  kana,
 };

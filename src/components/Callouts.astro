@@ -1,5 +1,12 @@
 ---
-import type { Callout } from '../data/projects';
+interface Callout {
+  label: string;
+  /** Point the line touches, in % of the figure. */
+  at: [number, number];
+  /** Where the label sits, in % of the figure. */
+  from: [number, number];
+  align?: 'left' | 'right';
+}
 
 interface Props {
   callouts: Callout[];

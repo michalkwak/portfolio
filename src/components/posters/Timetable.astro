@@ -1,0 +1,54 @@
+---
+// The metro map's x-ray: the same courses as a timetable, by year and period.
+// The placement is illustrative, in the order the map's lines run.
+type Line = 'core' | 'data' | 'math' | 'web' | 'none';
+
+const periods = ['P I', 'P II', 'P III', 'P IV'];
+const years: { year: string; cells: [string, Line][][] }[] = [
+  {
+    year: 'Y1',
+    cells: [
+      [['Prog. I', 'core'], ['Lin. Algebra', 'math']],
+      [['Prog. II', 'core'], ['Stats & R I', 'data']],
+      [['DSA I', 'core'], ['Probability', 'math']],
+      [['Full Stack', 'web'], ['Data Analysis', 'data']],
+    ],
+  },
+  {
+    year: 'Y2',
+    cells: [
+      [['DSA II', 'core'], ['Stats & R II', 'math']],
+      [['Databases', 'core']],
+      [['Intro to AI', 'data']],
+      [['Software Eng.', 'core']],
+    ],
+  },
+  {
+    year: 'Y3',
+    cells: [[['Electives', 'none']], [['Electives', 'none']], [['Thesis', 'core']], [['Thesis', 'core']]],
+  },
+];
+---
+
+<p class="xray-label">Timetable — 002</p>
+<table class="timetable">
+  <thead>
+    <tr><th></th>{periods.map((p) => <th>{p}</th>)}</tr>
+  </thead>
+  <tbody>
+    {
+      years.map(({ year, cells }) => (
+        <tr>
+          <th>{year}</th>
+          {cells.map((courses) => (
+            <td>
+              {courses.map(([name, line]) => (
+                <span class={`chip ${line}`}>{name}</span>
+              ))}
+            </td>
+          ))}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

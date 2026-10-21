@@ -4,16 +4,7 @@
 // whose own x-ray replaces the structure list.
 import { LOW_LINE_PERCENT } from '../scripts/figures/glucose';
 
-export type Pattern = 'glucose' | 'graph' | 'eigen' | 'squeeze' | 'finland' | 'koi';
-
-export interface Callout {
-  label: string;
-  /** Point the line touches, in % of the poster. */
-  at: [number, number];
-  /** Where the label sits, in % of the poster. */
-  from: [number, number];
-  align?: 'left' | 'right';
-}
+export type Pattern = 'glucose' | 'metro' | 'eigen' | 'squeeze' | 'finland' | 'kana';
 
 export interface Project {
   id: string;
@@ -27,14 +18,16 @@ export interface Project {
   tags: string[];
   href: string;
   pattern: Pattern;
-  colors: { bg: string; ink: string; xrayBg?: string; xrayFg?: string };
-  callouts: Callout[];
+  /** `art` inks the halftone when it differs from the text ink. */
+  colors: { bg: string; ink: string; art?: string; xrayBg?: string; xrayFg?: string };
   /** Dashed reference line across the poster, at this % from the top. */
   rule?: { y: number; label: string };
   structure: string[];
   /** Headline result, printed on the poster. */
   finding?: string;
   live?: 'glucose' | 'squeeze';
+  /** A drawn layer over the art, with its own x-ray (src/components/posters/). */
+  overlay?: 'metro' | 'gojuon';
   featured?: boolean;
 }
 
@@ -56,7 +49,6 @@ export const projects: Project[] = [
     colors: { bg: '#a597dd', ink: '#141215' },
     live: 'glucose',
     rule: { y: LOW_LINE_PERCENT, label: '70 mg/dL' },
-    callouts: [],
     structure: [
       '8.29 M CGM readings · CITY trial, 153 participants',
       'split into gap-free segments',
@@ -78,9 +70,9 @@ export const projects: Project[] = [
     blurb: 'Co-founder and developer of a study-planning platform that makes degree structures navigable.',
     tags: ['Full-stack', 'Git', 'User research'],
     href: '#work',
-    pattern: 'graph',
-    colors: { bg: '#ff6b35', ink: '#151210' },
-    callouts: [{ label: 'Prerequisite', at: [42, 28], from: [96, 16], align: 'right' }],
+    pattern: 'metro',
+    overlay: 'metro',
+    colors: { bg: '#ece6da', ink: '#151210', art: '#5b7fd0' },
     structure: [
       'degree structure data',
       'backend tools for processing it',
@@ -101,7 +93,6 @@ export const projects: Project[] = [
     href: `${GITHUB}/Face-Recognition`,
     pattern: 'eigen',
     colors: { bg: '#121211', ink: '#e9e2d3', xrayBg: '#e9e2d3', xrayFg: '#121211' },
-    callouts: [{ label: 'Eigenface 01', at: [39, 41], from: [96, 14], align: 'right' }],
     structure: [
       'face images → mean-centred matrix',
       'covariance matrix',
@@ -123,7 +114,6 @@ export const projects: Project[] = [
     pattern: 'squeeze',
     live: 'squeeze',
     colors: { bg: '#e4572e', ink: '#120f0e' },
-    callouts: [{ label: 'W(x₁, x₂)', at: [66, 32], from: [96, 16], align: 'right' }],
     structure: [
       'two-mode squeezed state',
       'joint · homodyne · heterodyne detection',
@@ -143,7 +133,6 @@ export const projects: Project[] = [
     href: `${GITHUB}/Finnish-Municipal-Economic-Resilience-Index`,
     pattern: 'finland',
     colors: { bg: '#e8e1d2', ink: '#1d3a2c' },
-    callouts: [{ label: 'Helsinki', at: [46, 73], from: [96, 62], align: 'right' }],
     structure: [
       'three open datasets',
       'clean & join by municipality',
@@ -157,14 +146,14 @@ export const projects: Project[] = [
     index: '006',
     kind: 'Game',
     year: '2023 — 24',
-    word: 'カナ',
+    word: 'あいうえお',
     title: 'Kana Quest',
     blurb: 'A 2D Unity quiz game for practising Japanese kana.',
     tags: ['C#', 'Unity'],
     href: `${GITHUB}/Kana-Quest`,
-    pattern: 'koi',
-    colors: { bg: '#1f47c9', ink: '#ffcf33' },
-    callouts: [{ label: 'Koi / 鯉', at: [62, 13], from: [96, 30], align: 'right' }],
+    pattern: 'kana',
+    overlay: 'gojuon',
+    colors: { bg: '#efe7d6', ink: '#1a1716', art: '#d23a2a' },
     structure: ['quiz engine', 'modular game logic', 'UI systems', 'playtesting & bug tracking'],
   },
 ];

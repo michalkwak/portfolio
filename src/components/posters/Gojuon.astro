@@ -1,0 +1,56 @@
+---
+// The 46 hiragana in gojūon order: rows a, ka, sa … wa, n; columns a i u e o.
+// The poster prints the kana; its x-ray prints the same grid as an answer key.
+// The quiz question is highlighted here and drawn huge behind the grid.
+import { KANA_QUESTION as QUESTION } from '../../scripts/patterns';
+
+interface Props {
+  mode: 'kana' | 'romaji';
+}
+
+const { mode } = Astro.props;
+
+const kana = [
+  ['あ', 'い', 'う', 'え', 'お'],
+  ['か', 'き', 'く', 'け', 'こ'],
+  ['さ', 'し', 'す', 'せ', 'そ'],
+  ['た', 'ち', 'つ', 'て', 'と'],
+  ['な', 'に', 'ぬ', 'ね', 'の'],
+  ['は', 'ひ', 'ふ', 'へ', 'ほ'],
+  ['ま', 'み', 'む', 'め', 'も'],
+  ['や', '', 'ゆ', '', 'よ'],
+  ['ら', 'り', 'る', 'れ', 'ろ'],
+  ['わ', '', '', '', 'を'],
+  ['ん', '', '', '', ''],
+];
+const romaji = [
+  ['a', 'i', 'u', 'e', 'o'],
+  ['ka', 'ki', 'ku', 'ke', 'ko'],
+  ['sa', 'shi', 'su', 'se', 'so'],
+  ['ta', 'chi', 'tsu', 'te', 'to'],
+  ['na', 'ni', 'nu', 'ne', 'no'],
+  ['ha', 'hi', 'fu', 'he', 'ho'],
+  ['ma', 'mi', 'mu', 'me', 'mo'],
+  ['ya', '', 'yu', '', 'yo'],
+  ['ra', 'ri', 'ru', 're', 'ro'],
+  ['wa', '', '', '', 'wo'],
+  ['n', '', '', '', ''],
+];
+---
+
+<div class:list={['gojuon', mode]} aria-hidden="true">
+  {
+    kana.flatMap((row, r) =>
+      row.map((k, c) => (
+        <span class:list={['g-cell', { q: k === QUESTION }]}>
+          {mode === 'kana' ? k : k && (
+            <>
+              <b>{k}</b>
+              <i>{romaji[r][c]}</i>
+            </>
+          )}
+        </span>
+      )),
+    )
+  }
+</div>

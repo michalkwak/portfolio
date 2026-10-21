@@ -1,5 +1,8 @@
 ---
 import Callouts from './Callouts.astro';
+import Gojuon from './posters/Gojuon.astro';
+import MetroMap from './posters/MetroMap.astro';
+import Timetable from './posters/Timetable.astro';
 import type { Project } from '../data/projects';
 
 interface Props {
@@ -14,6 +17,7 @@ const wordSize = upright ? 30 : Math.min(30, 118 / ([...p.word].length * 0.56));
 const style = [
   `--bg: ${p.colors.bg}`,
   `--ink: ${p.colors.ink}`,
+  `--art: ${p.colors.art ?? p.colors.ink}`,
   p.colors.xrayBg && `--xray-bg: ${p.colors.xrayBg}`,
   p.colors.xrayFg && `--xray-fg: ${p.colors.xrayFg}`,
   `--word-size: ${wordSize.toFixed(2)}cqi`,
@@ -34,7 +38,7 @@ const style = [
     p.live ? (
       <canvas class="poster-art" aria-hidden="true" />
     ) : (
-      <canvas class="poster-art" data-pattern={p.pattern} data-ink={p.colors.ink} aria-hidden="true" />
+      <canvas class="poster-art" data-pattern={p.pattern} data-ink={p.colors.art ?? p.colors.ink} aria-hidden="true" />
     )
   }
 
@@ -44,7 +48,9 @@ const style = [
       <span>{p.year}</span>
     </div>
     <span class:list={['poster-word', { upright }]} aria-hidden="true">{p.word}</span>
-    <Callouts callouts={p.callouts} rule={p.rule} />
+    {p.rule && <Callouts callouts={[]} rule={p.rule} />}
+    {p.overlay === 'metro' && <MetroMap />}
+    {p.overlay === 'gojuon' && <Gojuon mode="kana" />}
     <div class="poster-bottom">
       <h3>{p.title}</h3>
       {p.finding && <p class="poster-finding">{p.finding}</p>}
@@ -57,6 +63,15 @@ const style = [
     p.live ? (
       <div class="xray" aria-hidden="true">
         <canvas class="xray-canvas" />
+      </div>
+    ) : p.overlay === 'metro' ? (
+      <div class="xray" aria-hidden="true">
+        <Timetable />
+      </div>
+    ) : p.overlay === 'gojuon' ? (
+      <div class="xray xray-key" aria-hidden="true">
+        <p class="xray-label">Answer key — 006</p>
+        <Gojuon mode="romaji" />
       </div>
     ) : (
       <div class="xray" aria-hidden="true">
